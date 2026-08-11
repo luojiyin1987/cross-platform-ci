@@ -56,10 +56,10 @@ jobs:
 
     steps:
       - name: Checkout caller repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Set up Go
-        uses: actions/setup-go@v6
+        uses: actions/setup-go@v7
         with:
           go-version-file: ${{ inputs.go-version-file }}
 
@@ -79,7 +79,7 @@ jobs:
         run: go build -trimpath -o "dist/${{ inputs.binary-name || github.event.repository.name }}${{ matrix.extension }}" "${{ inputs.package }}"
 
       - name: Upload binary
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ matrix.target }}
           path: dist/${{ inputs.binary-name || github.event.repository.name }}${{ matrix.extension }}
