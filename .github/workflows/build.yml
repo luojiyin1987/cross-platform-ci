@@ -1,0 +1,86 @@
+name: Cross-platform Go build
+
+on:
+  workflow_call:
+    inputs:
+      go-version-file:
+        description: Path to the Go version file
+        required: false
+        type: string
+        default: go.mod
+      package:
+        description: Main package to build
+        required: false
+        type: string
+        default: .
+      binary-name:
+        description: Output binary name; defaults to the caller repository name
+        required: false
+        type: string
+        default: ""
+      run-tests:
+        description: Run go test ./... before building
+        required: false
+        type: boolean
+        default: true
+
+jobs:
+  build:
+    name: ${{ matrix.target }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: linux-x64
+            runner: ubuntu-latest
+            extension: ""
+          - target: linux-arm64
+            runner: ubuntu-24.04-arm
+            extension: ""
+          - target: windows-x64
+            runner: windows-latest
+            extension: .exe
+          - target: windows-arm64
+            runner: windows-11-arm
+            extension: .exe
+          - target: macos-x64
+            runner: macos-15-intel
+            extension: ""
+          - target: macos-arm64
+            runner: macos-latest
+            extension: ""
+
+    runs-on: ${{ matrix.runner }}
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout caller repository
+        uses: actions/checkout@v7
+
+      - name: Set up Go
+        uses: actions/setup-go@v7
+        with:
+          go-version-file: ${{ inputs.go-version-file }}
+
+      - name: Show native platform
+        run: |
+          go version
+          go env GOOS GOARCH
+
+      - name: Test
+        if: ${{ inputs.run-tests }}
+        run: go test ./...
+
+      - name: Create output directory
+        run: mkdir dist
+
+      - name: Build native binary
+        run: go build -trimpath -o "dist/${{ inputs.binary-name || github.event.repository.name }}${{ matrix.extension }}" "${{ inputs.package }}"
+
+      - name: Upload binary
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ matrix.target }}
+          path: dist/${{ inputs.binary-name || github.event.repository.name }}${{ matrix.extension }}
+          if-no-files-found: error
