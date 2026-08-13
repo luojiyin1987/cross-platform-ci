@@ -44,6 +44,7 @@ jobs:
     with:
       package: ./cmd/myapp
       binary-name: myapp
+      ldflags: -s -w
 ```
 
 During development, examples use `@main`. Stable consumers should use a version tag such as `@v1` after the first release is cut.
@@ -77,6 +78,7 @@ macos-arm64
 | `go-version-file` | `go.mod` | File used by `actions/setup-go` to select Go |
 | `package` | `.` | Main package passed to `go build` |
 | `binary-name` | caller repository name | Output executable name |
+| `ldflags` | empty | Linker flags passed to `go build` |
 | `run-tests` | `true` | Run `go test ./...` before build |
 
 ## Repository self-test

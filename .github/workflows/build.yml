@@ -18,6 +18,11 @@ on:
         required: false
         type: string
         default: ""
+      ldflags:
+        description: Linker flags passed to go build
+        required: false
+        type: string
+        default: ""
       run-tests:
         description: Run go test ./... before building
         required: false
@@ -76,7 +81,10 @@ jobs:
         run: mkdir dist
 
       - name: Build native binary
-        run: go build -trimpath -o "dist/${{ inputs.binary-name || github.event.repository.name }}${{ matrix.extension }}" "${{ inputs.package }}"
+        shell: bash
+        env:
+          GO_BUILD_LDFLAGS: ${{ inputs.ldflags }}
+        run: go build -trimpath -ldflags "$GO_BUILD_LDFLAGS" -o "dist/${{ inputs.binary-name || github.event.repository.name }}${{ matrix.extension }}" "${{ inputs.package }}"
 
       - name: Upload binary
         uses: actions/upload-artifact@v7
