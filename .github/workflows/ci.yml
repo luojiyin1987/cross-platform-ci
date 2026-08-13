@@ -17,3 +17,4 @@ jobs:
     with:
       package: ./cmd/cross-platform-ci
       binary-name: cross-platform-ci
+      ldflags: -s -w
